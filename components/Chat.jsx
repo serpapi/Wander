@@ -49,7 +49,7 @@ export default function Chat({ className })  {
 
   return (
     <div className={`flex flex-col justify-between gap-5 pb-6 w-full h-full overflow-hidden ${className}`}>
-      <div id="chatbox" className="overflow-scroll flex flex-col-reverse">
+      <div id="chatbox" className="overflow-scroll flex flex-col-reverse pr-6 gap-2">
         {messages.map((message, index) => <ChatBubble key={index} {...message} />)}
       </div>
       <div className="bg-container mx-4 shadow rounded-lg">
