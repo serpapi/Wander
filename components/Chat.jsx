@@ -5,13 +5,17 @@ import axios from "axios"
 import cx from "classnames"
 import ChatBubble from "./ChatBubble"
 
-export default function Chat({ className })  {
+export default function Chat({ className, onAction })  {
   const [typingMessage, setTypingMessage] = useState("")
   const [loading, setLoading] = useState(false)
   const [messages, setMessages] = useState([])
 
   useEffect(() => {
     const loadMessages = async () => {
+      await axios.get('/api/initiate-session')
+      .then(() => console.log("Session started"))
+      .catch(() => console.log("Failed to initiate session. Refreshing is wise move."))
+
       setLoading(true)
 
       try {
@@ -33,16 +37,35 @@ export default function Chat({ className })  {
     adjustTextAreaHeight()
     setLoading(true)
 
-    const updatedMessages = [{ role: "user", content: [{ type: "text", text: { value: typingMessage } }] }, ...messages]
-    setMessages(updatedMessages)
+    const cleanTypingMessage = typingMessage.trim()
+
+    setMessages([
+      { role: "user", content: [{ type: "text", text: { value: cleanTypingMessage } }] }, 
+      ...messages
+    ])
     document.querySelector("#chatbox")?.scrollTo(0, 0)
     
     try {
-      const { data } = await axios.post(`/api/chat`, { message: typingMessage })
-      if (data.messages) {
-        setMessages(data.messages)
-      } else if (data.error) {
-        alert(data.error)
+      const response = await fetch("/api/chat", {
+        method: "POST",
+        body: JSON.stringify({
+          message: cleanTypingMessage
+        })
+      })
+
+      const reader = response.body.getReader()
+      while (true) {
+        const {value, done} = await reader.read();
+        if (done) break;
+
+        const data = new TextDecoder().decode(value)
+        const { messages, action, actionArgs } = JSON.parse(data)
+        if (messages) {
+          setMessages(messages)
+        }
+        if (action) {
+          onAction(action, actionArgs)
+        }
       }
     } catch (err) {
       alert(err)

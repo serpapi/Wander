@@ -3,22 +3,7 @@ import { getSession } from "./session";
 
 const openai = new OpenAI();
 
-export async function getMessages() {
-  const thread = await getSessionThread()
-  return getThreadMessagesById(thread.id)
-}
-
-export async function addQuestion(question) {
-  const assistant = await createOrFindAssistant()
-  const thread = await getSessionThread()
-  
-  await createUserMessageInThread(thread.id, question)
-  const run = await runUntilNextStep(assistant.id, thread.id)
-  
-  return getThreadMessagesById(thread.id)
-}
-
-async function getSessionThread() {
+export async function getSessionThread() {
   const session = await getSession()
   if (!session) {
     throw new "Session hasn't initiated."
@@ -32,7 +17,7 @@ async function getSessionThread() {
   return thread
 }
 
-async function runUntilNextStep(assistantId, threadId) {
+export async function runUntilNextStep(assistantId, threadId) {
   const run = await openai.beta.threads.runs.create(
     threadId,
     {
@@ -49,7 +34,26 @@ async function runUntilNextStep(assistantId, threadId) {
   return lastesRun
 }
 
-async function createUserMessageInThread(threadId, message) {
+export async function submitToolOutputs(threadId, runId, outputs) {
+  return openai.beta.threads.runs.submitToolOutputs(
+    threadId,
+    runId,
+    {
+      tool_outputs: outputs
+    }
+  )
+}
+
+export async function getActiveRun(threadId) {
+  try {
+    const { data } = await openai.beta.threads.runs.list(threadId)
+    return data.find(run => run.status === "requires_action" || run.status === "queued" || run.status === "in_progress")
+  } catch {
+    return null
+  }
+}
+
+export async function createUserMessageInThread(threadId, message) {
   return openai.beta.threads.messages.create(
     threadId,
     {
@@ -59,7 +63,7 @@ async function createUserMessageInThread(threadId, message) {
   )
 }
 
-async function getThreadById(id) {
+export async function getThreadById(id) {
   try {
     return openai.beta.threads.retrieve(id)
   } catch (e) {
@@ -67,7 +71,7 @@ async function getThreadById(id) {
   }
 }
 
-async function getThreadMessagesById(threadId) {
+export async function getThreadMessagesById(threadId) {
   try {
     const { data } = await openai.beta.threads.messages.list(threadId)
     return data
@@ -76,7 +80,7 @@ async function getThreadMessagesById(threadId) {
   }
 }
 
-async function createOrFindAssistant() {
+export async function createOrFindAssistant() {
   try {
     const { data } = await openai.beta.assistants.list()
     const assistant = data.find(assistant => assistant.metadata?.created_by === "wander")
@@ -84,7 +88,21 @@ async function createOrFindAssistant() {
     return openai.beta.assistants.create({
       name: "Expert Travel Guide",
       instructions: "You are a very experience travel guide who know places all around the world. You can suggest the best places to go in any city. You also can provide detail location like GPS Coordinates that help user to navigate.",
-      tools: [{type: "function"}],
+      tools: [{
+        type: "function",
+        function: {
+          name: "ui_addMapMarker",
+          description: "Set the marker on the map",
+          parameters: {
+            type: "object",
+            properties: {
+              latitude: {type: "number", description: "Latitude of the location or place"},
+              longitude: {type: "number", description: "Longitude of the location or place"},
+            },
+            required: ["latitude", "longitude"]
+          },
+        }
+      }],
       model: "gpt-4-1106-preview",
       description: "Made with Wander",
       metadata: {
