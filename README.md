@@ -1,7 +1,9 @@
-Replicate Wanderlust demo that shown in OpenAI Dev Day.
+Replicate Wanderlust demo that shown in OpenAI Dev Day.\
 Enhanced with real time information using SerpApi.
 
-# Status: WIP
+# Status
+
+WIP
 
 # Demo
 
