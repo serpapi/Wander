@@ -1,8 +1,13 @@
 import { NextResponse } from "next/server";
-import { getAnswer } from "../intelligent";
+import { addQuestion, getMessages } from "../intelligent";
 
 export async function POST(request) {
   const data = await request.json();
-  const answer = await getAnswer(data.message)
-  return NextResponse.json({ message: answer }, { status: 200 })
+  const messages = await addQuestion(data.message)
+  return NextResponse.json({ messages }, { status: 200 })
+}
+
+export async function GET(request) {
+  const messages = await getMessages()
+  return NextResponse.json({ messages }, { status: 200 })
 }

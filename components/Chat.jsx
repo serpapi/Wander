@@ -1,19 +1,31 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import axios from "axios"
 import cx from "classnames"
 import ChatBubble from "./ChatBubble"
-
-// interface Message {
-//   role: "assistant" | "user"
-//   message: string
-// }
 
 export default function Chat({ className })  {
   const [typingMessage, setTypingMessage] = useState("")
   const [loading, setLoading] = useState(false)
   const [messages, setMessages] = useState([])
+
+  useEffect(() => {
+    const loadMessages = async () => {
+      setLoading(true)
+
+      try {
+        const { data } = await axios.get(`/api/chat`)
+        setMessages(data.messages)
+      } catch (err) {
+        alert(err)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    loadMessages()
+  }, [])
 
   const sendMessage = async () => {
     if (!typingMessage) return
@@ -21,14 +33,14 @@ export default function Chat({ className })  {
     adjustTextAreaHeight()
     setLoading(true)
 
-    const updatedMessages = [{ role: "user", message: typingMessage }, ...messages]
+    const updatedMessages = [{ role: "user", content: [{ type: "text", text: { value: typingMessage } }] }, ...messages]
     setMessages(updatedMessages)
     document.querySelector("#chatbox")?.scrollTo(0, 0)
     
     try {
       const { data } = await axios.post(`/api/chat`, { message: typingMessage })
-      if (data.message) {
-        setMessages([{ role: "assistant", message: data.message }, ...updatedMessages])
+      if (data.messages) {
+        setMessages(data.messages)
       } else if (data.error) {
         alert(data.error)
       }
@@ -49,10 +61,10 @@ export default function Chat({ className })  {
 
   return (
     <div className={`flex flex-col justify-between gap-5 pb-6 w-full h-full overflow-hidden ${className}`}>
-      <div id="chatbox" className="overflow-scroll flex flex-col-reverse pr-6 gap-2">
+      <div id="chatbox" className="overflow-scroll flex flex-col-reverse px-4 gap-2">
         {messages.map((message, index) => <ChatBubble key={index} {...message} />)}
       </div>
-      <div className="bg-container mx-4 shadow rounded-lg">
+      <div className="mx-4 shadow shadow-primary rounded-lg">
         <form 
           className="flex"
           onSubmit={(e) => {

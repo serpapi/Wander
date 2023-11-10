@@ -1,1 +1,0 @@
-export const SYSTEM_TEMPLATE = `You are a helpful assistant`;
