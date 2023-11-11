@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { createUserMessageInThread, createOrFindAssistant, getSessionThread, runUntilNextStep, getThreadMessagesById, submitToolOutputs, getActiveRun } from "@/app/api/intelligent";
+import { createUserMessageInThread, createOrFindAssistant, getSessionThread, getThreadMessagesById, submitToolOutputs, getActiveRun, createRun, waitUntilNextStep } from "@/app/api/intelligent";
 
 export async function POST(request) {
   const payload = await request.json();
@@ -13,8 +13,10 @@ export async function POST(request) {
       let run = await getActiveRun(thread.id)
       if (!run) {
         await createUserMessageInThread(thread.id, payload.message)
-        run = await runUntilNextStep(assistant.id, thread.id)
+        run = await createRun(assistant.id, thread.id)
+        run = await waitUntilNextStep(run, thread.id)
       }
+
       console.log(run.required_action?.submit_tool_outputs?.tool_calls)
       if (run.required_action && run.required_action.type === "submit_tool_outputs") {
         const toolCalls = run.required_action.submit_tool_outputs.tool_calls
@@ -35,7 +37,8 @@ export async function POST(request) {
           })
         }
 
-        submitToolOutputs(thread.id, run.id, toolOutputs)
+        const toolOutputRun = await submitToolOutputs(thread.id, run.id, toolOutputs)
+        await waitUntilNextStep(toolOutputRun, thread.id)
       }
       
       const messages = await getThreadMessagesById(thread.id)

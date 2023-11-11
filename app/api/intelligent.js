@@ -17,14 +17,16 @@ export async function getSessionThread() {
   return thread
 }
 
-export async function runUntilNextStep(assistantId, threadId) {
-  const run = await openai.beta.threads.runs.create(
+export async function createRun(assistantId, threadId) {
+  return await openai.beta.threads.runs.create(
     threadId,
     {
       assistant_id: assistantId
     }
   )
+}
 
+export async function waitUntilNextStep(run, threadId) {
   // Check running status
   let lastesRun = await openai.beta.threads.runs.retrieve(threadId, run.id)
   while(lastesRun.status === "queued" || lastesRun.status === "in_progress") {
@@ -47,7 +49,7 @@ export async function submitToolOutputs(threadId, runId, outputs) {
 export async function getActiveRun(threadId) {
   try {
     const { data } = await openai.beta.threads.runs.list(threadId)
-    return data.find(run => run.status === "requires_action" || run.status === "queued" || run.status === "in_progress")
+    return data.find(run => run.status === "requires_action" || run.status === "queued" || run.status === "in_progress" || run.status === "cancelling")
   } catch {
     return null
   }
