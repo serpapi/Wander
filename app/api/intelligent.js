@@ -73,6 +73,10 @@ export async function getThreadById(id) {
   }
 }
 
+export async function deleteThreadById(threadId) {
+  return await openai.beta.threads.del(threadId)
+}
+
 export async function getThreadMessagesById(threadId) {
   try {
     const { data } = await openai.beta.threads.messages.list(threadId)

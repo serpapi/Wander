@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
-import { createUserMessageInThread, createOrFindAssistant, getSessionThread, getThreadMessagesById, submitToolOutputs, getActiveRun, createRun, waitUntilNextStep } from "@/app/api/intelligent";
+import { createUserMessageInThread, createOrFindAssistant, getSessionThread, getThreadMessagesById, submitToolOutputs, getActiveRun, createRun, waitUntilNextStep, deleteThreadById } from "@/app/api/intelligent";
+import { createSessionCookie } from "../session";
 
 export async function POST(request) {
   const payload = await request.json();
@@ -58,4 +59,15 @@ export async function GET() {
   const thread = await getSessionThread()
   const messages = await getThreadMessagesById(thread.id)
   return NextResponse.json({ messages }, { status: 200 })
+}
+
+export async function DELETE() {
+  const thread = await getSessionThread()
+  await deleteThreadById(thread.id)
+
+  const sessionCookie = await createSessionCookie()
+  return new NextResponse("OK", { 
+    status: 200,
+    headers: { 'Set-Cookie': sessionCookie }
+  })
 }

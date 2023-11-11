@@ -28,7 +28,7 @@ export default function Home() {
         <FontAwesomeIcon icon={faCompass} className='text-lg' />
         <h1 className='text-lg'>Wander</h1>
       </header>
-      <div className='relative flex h-[calc(100vh-50px)]'>
+      <div className='flex h-[calc(100vh-50px)]'>
         <div className='flex-shrink-0 w-1/2 px-6 pb-6'>
           <Map />
         </div>
