@@ -1,3 +1,20 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.2);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.thinking {
+  @apply block w-[16px] h-[16px] bg-on-container rounded-full;
+  animation: pulse 1.5s infinite;
+}

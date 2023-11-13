@@ -102,6 +102,7 @@ export default function Chat({ className, onAction })  {
       </div>
       <div className={`flex flex-col justify-between gap-5 pb-6 w-full h-full overflow-hidden ${className}`}>
         <div id="chatbox" className="overflow-scroll flex flex-col-reverse px-4 gap-2">
+          {loading && <ChatBubble role="assistant" type="thinking" />}
           {messages.map((message, index) => <ChatBubble key={index} {...message} />)}
         </div>
         <div className="mx-4 shadow shadow-primary rounded-lg">
