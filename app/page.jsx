@@ -5,7 +5,6 @@ import { faCompass } from "@fortawesome/free-regular-svg-icons"
 import Chat from '@/components/Chat'
 import Map from '@/components/Map'
 import * as maptilersdk from '@maptiler/sdk';
-import { useEffect } from 'react'
 
 export default function Home() {
 
@@ -23,7 +22,11 @@ export default function Home() {
             coordinates.push(new maptilersdk.LngLat(coordinate.longitude, coordinate.latitude))
         })
 
-        window.map.fitBounds(new maptilersdk.LngLatBounds(coordinates), { maxZoom: 9 })
+        if (coordinates.length > 1) {
+          window.map.fitBounds(new maptilersdk.LngLatBounds(coordinates), { maxZoom: 9 })
+        } else if (coordinates.length === 1) {
+          window.map.panTo(coordinates[0])
+        }
       }
     }
   }
