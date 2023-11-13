@@ -1,5 +1,6 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faCompass } from "@fortawesome/free-regular-svg-icons"
+import Markdown from 'react-markdown'
 
 export default function ChatBubble({ role, content }) {
   let bubbleClass = ''
@@ -16,7 +17,9 @@ export default function ChatBubble({ role, content }) {
   return <div className={`p-4 ${bubbleClass}`}>
     <div className="flex gap-4">
       {profile}
-      <p className="whitespace-pre-wrap py-1" dangerouslySetInnerHTML={{ __html: content[0].text?.value }}></p>
+      <p className="whitespace-pre-wrap py-1">
+        <Markdown>{content[0].text?.value}</Markdown>
+      </p>
     </div>
   </div>
 }
