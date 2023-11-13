@@ -5,19 +5,25 @@ import { faCompass } from "@fortawesome/free-regular-svg-icons"
 import Chat from '@/components/Chat'
 import Map from '@/components/Map'
 import * as maptilersdk from '@maptiler/sdk';
+import { useEffect } from 'react'
 
 export default function Home() {
 
   const handleAction = (action, args) => {
-    if (action === "addMapMarker") {
+    if (action === "addMapMarkers") {
       if (window.map) {
-        window.map.panTo([args.longitude, args.latitude])
+        const coordinates = []
+        args?.markers?.forEach(coordinate => {
+          new maptilersdk.Marker({
+            color: "#FF0000",
+            draggable: false
+          }).setLngLat([coordinate.longitude, coordinate.latitude])
+            .addTo(window.map)
 
-        new maptilersdk.Marker({
-          color: "#FF0000",
-          draggable: false
-        }).setLngLat([args.longitude, args.latitude])
-        .addTo(window.map)
+            coordinates.push(new maptilersdk.LngLat(coordinate.longitude, coordinate.latitude))
+        })
+
+        window.map.fitBounds(new maptilersdk.LngLatBounds(coordinates), { maxZoom: 9 })
       }
     }
   }

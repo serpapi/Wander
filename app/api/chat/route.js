@@ -29,7 +29,9 @@ export async function POST(request) {
               action: functionName,
               actionArgs: JSON.parse(toolCalls[i].function.arguments)
             }
-            controller.enqueue(encoder.encode(JSON.stringify(actionReponse)))
+            // All the chunk will combined for some cases, thus not able to parse the JSON
+            // <--JSON allow use to split and parse correctly
+            controller.enqueue(encoder.encode(`${JSON.stringify(actionReponse)}<--JSON`))
           }
 
           toolOutputs.push({

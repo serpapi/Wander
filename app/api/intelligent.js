@@ -97,15 +97,23 @@ export async function createOrFindAssistant() {
       tools: [{
         type: "function",
         function: {
-          name: "ui_addMapMarker",
-          description: "Set the marker on the map",
+          name: "ui_addMapMarkers",
+          description: "Set the marker on the map. It can accpet single entry or multiple entries.",
           parameters: {
             type: "object",
             properties: {
-              latitude: {type: "number", description: "Latitude of the location or place"},
-              longitude: {type: "number", description: "Longitude of the location or place"},
+              markers: {
+                type: "array",
+                items: {
+                  type: "object",
+                  properties: {
+                    latitude: {type: "number", description: "Latitude of the location or place"},
+                    longitude: {type: "number", description: "Longitude of the location or place"},
+                  },
+                  required: ["latitude", "longitude"]
+                }
+              }
             },
-            required: ["latitude", "longitude"]
           },
         }
       }],

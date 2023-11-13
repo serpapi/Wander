@@ -60,14 +60,17 @@ export default function Chat({ className, onAction })  {
         const {value, done} = await reader.read();
         if (done) break;
 
-        const data = new TextDecoder().decode(value)
-        const { messages, action, actionArgs } = JSON.parse(data)
-        if (messages) {
-          setMessages(messages)
-        }
-        if (action) {
-          onAction(action, actionArgs)
-        }
+        const rawData = new TextDecoder().decode(value)
+        const data = rawData.split("<--JSON").filter(dt => dt)
+        data.forEach(dt => {
+          const { messages, action, actionArgs } = JSON.parse(dt)
+          if (messages) {
+            setMessages(messages)
+          }
+          if (action) {
+            onAction(action, actionArgs)
+          }
+        })
       }
     } catch (err) {
       alert(err)
