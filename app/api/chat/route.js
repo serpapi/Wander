@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createUserMessageInThread, createOrFindAssistant, getSessionThread, getThreadMessagesById, submitToolOutputs, getActiveRun, createRun, waitUntilNextStep, deleteThreadById } from "@/app/api/intelligent";
 import { createSessionCookie } from "../session";
+import { mapSearch } from "../search_api";
 
 export async function POST(request) {
   const payload = await request.json();
@@ -18,30 +19,34 @@ export async function POST(request) {
         run = await waitUntilNextStep(run, thread.id)
       }
 
-      console.log(run.required_action?.submit_tool_outputs?.tool_calls)
-      if (run.required_action && run.required_action.type === "submit_tool_outputs") {
+      while (run.required_action && run.required_action.type === "submit_tool_outputs") {
+        console.log(run.required_action?.submit_tool_outputs?.tool_calls)
         const toolCalls = run.required_action.submit_tool_outputs.tool_calls
         const toolOutputs = []
         for (let i = 0; i < toolCalls.length; i++) {
-          if (toolCalls[i].function.name.startsWith("ui_")) {
-            const functionName = toolCalls[i].function.name.replace("ui_", "")
+          const functionName = toolCalls[i].function.name
+          const functionArgs = JSON.parse(toolCalls[i].function.arguments)
+          let functionOutput = "{success: true}"
+          if (functionName.startsWith("ui_")) {
             const actionReponse = {
-              action: functionName,
-              actionArgs: JSON.parse(toolCalls[i].function.arguments)
+              action: functionName.replace("ui_", ""),
+              actionArgs: functionArgs
             }
             // All the chunk will combined for some cases, thus not able to parse the JSON
             // <--JSON allow use to split and parse correctly
             controller.enqueue(encoder.encode(`${JSON.stringify(actionReponse)}<--JSON`))
+          } else {
+            functionOutput = await handleToolCall(functionName, functionArgs)
           }
 
           toolOutputs.push({
             tool_call_id: toolCalls[i].id,
-            output: "{success: true}"
+            output: functionOutput
           })
         }
 
         const toolOutputRun = await submitToolOutputs(thread.id, run.id, toolOutputs)
-        await waitUntilNextStep(toolOutputRun, thread.id)
+        run = await waitUntilNextStep(toolOutputRun, thread.id)
       }
       
       const messages = await getThreadMessagesById(thread.id)
@@ -55,6 +60,13 @@ export async function POST(request) {
       "Content-Type": "application/json"
     }
   })
+}
+
+async function handleToolCall(functionName, functionArgs) {
+  if (functionName === "mapSearch") {
+    const results = await mapSearch(functionArgs.query, functionArgs.latitude, functionArgs.longitude)
+    return JSON.stringify(results)
+  }
 }
 
 export async function GET() {

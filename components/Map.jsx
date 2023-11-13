@@ -9,11 +9,11 @@ maptilersdk.config.apiKey = 'TwDPXTUT5y62rnrJfTxN';
 export default function Map({ className }) {
   useEffect(() => {
     window.map = new maptilersdk.Map({
-      container: 'map', // container's id or the HTML element to render the map
+      container: 'map',
       style: "streets-v2",
-      center: [-97.74242805297416, 30.270557801221628], // starting position [lng, lat]
-      zoom: 14, // starting zoom
-    });
+      center: [-97.74242805297416, 30.270557801221628],
+      zoom: 14,
+    })
   }, [])
 
   return <div id='map' className={cx('w-full h-full rounded-lg', className)}></div>

@@ -18,3 +18,12 @@
   @apply block w-[16px] h-[16px] bg-on-container rounded-full;
   animation: pulse 1.5s infinite;
 }
+
+.business-marker {
+  background: url(/business-marker.svg);
+  width: 35px;
+  height: 35px;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+}
