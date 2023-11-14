@@ -7,3 +7,7 @@ Enhanced with real time information using SerpApi.
 
 https://github.com/serpapi/Wander/assets/10222402/346152e6-7a1c-4658-9e38-645d6cdb3ab9
 
+# Tools
+
+- [OpenAI Assistants](https://platform.openai.com/docs/api-reference/assistants)
+- [SerpApi's Google Maps API](https://serpapi.com/google-maps-api)
