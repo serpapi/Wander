@@ -47,7 +47,10 @@ export default function useMap() {
       args?.markers?.forEach(business => {
         var el = document.createElement('div');
         el.id = business.place_id
-        el.className = 'business-marker'
+        el.style.background = `url(${business.thumbnail}) no-repeat center/cover`
+        el.style.borderRadius = "999px"
+        el.style.width = "35px"
+        el.style.height = "35px"
         el.setAttribute("data-json", JSON.stringify(business))
 
         el.addEventListener('click', function () {

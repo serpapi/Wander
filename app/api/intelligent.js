@@ -137,7 +137,7 @@ export async function createOrFindAssistant() {
                       latitude: {type: "number", description: "Latitude of the location or place"},
                       longitude: {type: "number", description: "Longitude of the location or place"},
                     },
-                    required: ["place_id", "latitude", "longitude"]
+                    required: ["place_id", "title", "thumbnail", "latitude", "longitude"]
                   }
                 }
               },
@@ -161,7 +161,7 @@ export async function createOrFindAssistant() {
           }
         }
       ],
-      model: "gpt-3.5-turbo-1106",
+      model: "gpt-4-1106-preview",
       description: "Made with Wander",
       metadata: {
         created_by: "wander"
