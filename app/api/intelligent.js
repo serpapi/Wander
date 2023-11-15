@@ -161,7 +161,7 @@ export async function createOrFindAssistant() {
           }
         }
       ],
-      model: "gpt-4-1106-preview",
+      model: "gpt-3.5-turbo-1106",
       description: "Made with Wander",
       metadata: {
         created_by: "wander"
